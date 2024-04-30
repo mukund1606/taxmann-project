@@ -26,7 +26,6 @@ import {
 
 import { api, isTRPCClientError } from "@/trpc/react";
 import { RegisterFormSchema } from "@/types/forms";
-import { TRPCClientError } from "@trpc/client";
 import Link from "next/link";
 
 export default function RegisterForm() {

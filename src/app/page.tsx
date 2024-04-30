@@ -10,6 +10,9 @@ export default async function Home() {
   }
   return (
     <div className="p-4">
+      <h1 className="text-right text-xl">
+        Hello, <strong>{session.user.name}!</strong>
+      </h1>
       <AllTickets user={session.user} />
     </div>
   );

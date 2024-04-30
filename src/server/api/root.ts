@@ -1,6 +1,9 @@
 import { helloRouter } from "@/server/api/routers/hello";
+import { register } from "@/server/api/routers/register";
+import { ticketRouter } from "@/server/api/routers/ticket";
 import { createCallerFactory, createTRPCRouter } from "@/server/api/trpc";
 
+import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 /**
  * This is the primary router for your server.
  *
@@ -8,11 +11,14 @@ import { createCallerFactory, createTRPCRouter } from "@/server/api/trpc";
  */
 export const appRouter = createTRPCRouter({
   hello: helloRouter,
+  ticket: ticketRouter,
+  register,
 });
 
 // export type definition of API
 export type AppRouter = typeof appRouter;
-
+export type AppRouterOutputTypes = inferRouterOutputs<AppRouter>;
+export type AppRouterInputTypes = inferRouterInputs<AppRouter>;
 /**
  * Create a server-side caller for the tRPC API.
  * @example

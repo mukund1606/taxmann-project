@@ -1,14 +1,14 @@
-import { PrismaAdapter } from "@auth/prisma-adapter";
 import {
   getServerSession,
   type DefaultSession,
   type NextAuthOptions,
 } from "next-auth";
-import { type Adapter } from "next-auth/adapters";
-import DiscordProvider from "next-auth/providers/discord";
+import Credentials from "next-auth/providers/credentials";
 
 import { env } from "@/env";
+import { decrypt } from "@/lib/utils";
 import { db } from "@/server/db";
+import { LoginFormSchema } from "@/types/forms";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -16,19 +16,25 @@ import { db } from "@/server/db";
  *
  * @see https://next-auth.js.org/getting-started/typescript#module-augmentation
  */
+declare module "next-auth/jwt" {
+  interface JWT {
+    id: string;
+    email: string;
+    name: string;
+    role: "ADMIN" | "USER";
+  }
+}
 declare module "next-auth" {
   interface Session extends DefaultSession {
-    user: {
-      id: string;
-      // ...other properties
-      // role: UserRole;
-    } & DefaultSession["user"];
+    user: User;
   }
 
-  // interface User {
-  //   // ...other properties
-  //   // role: UserRole;
-  // }
+  interface User {
+    id: string;
+    email: string;
+    name: string;
+    role: "ADMIN" | "USER";
+  }
 }
 
 /**
@@ -37,20 +43,70 @@ declare module "next-auth" {
  * @see https://next-auth.js.org/configuration/options
  */
 export const authOptions: NextAuthOptions = {
-  callbacks: {
-    session: ({ session, user }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: user.id,
-      },
-    }),
-  },
-  adapter: PrismaAdapter(db) as Adapter,
   providers: [
-    DiscordProvider({
-      clientId: env.DISCORD_CLIENT_ID,
-      clientSecret: env.DISCORD_CLIENT_SECRET,
+    Credentials({
+      name: "Credentials",
+      credentials: {
+        email: {
+          label: "Email",
+          type: "text",
+        },
+        password: {
+          label: "Password",
+          type: "password",
+        },
+        role: {
+          label: "Role",
+          type: "text",
+        },
+      },
+      async authorize(credentials) {
+        try {
+          LoginFormSchema.parse(credentials);
+        } catch (error) {
+          throw new Error("Invalid Credentials");
+        }
+        const { role, email, password } = LoginFormSchema.parse(credentials);
+        if (role === "ADMIN") {
+          const admin = await db.admin.findFirst({
+            where: {
+              email,
+            },
+          });
+          if (!admin) {
+            throw new Error("Invalid Credentials");
+          }
+          const dbPassword = decrypt(admin.password);
+          if (password !== dbPassword) {
+            throw new Error("Invalid Credentials");
+          }
+          return {
+            id: admin.id,
+            email: admin.email,
+            name: admin.name,
+            role: "ADMIN",
+          };
+        } else {
+          const user = await db.user.findFirst({
+            where: {
+              email,
+            },
+          });
+          if (!user) {
+            throw new Error("Invalid Credentials");
+          }
+          const dbPassword = decrypt(user.password);
+          if (password !== dbPassword) {
+            throw new Error("Invalid Credentials");
+          }
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: "USER",
+          };
+        }
+      },
     }),
     /**
      * ...add more providers here.
@@ -62,6 +118,34 @@ export const authOptions: NextAuthOptions = {
      * @see https://next-auth.js.org/providers/github
      */
   ],
+  secret: env.NEXTAUTH_SECRET,
+  session: {
+    strategy: "jwt",
+  },
+  callbacks: {
+    session({ session, token }) {
+      if (token) {
+        session.user = {
+          id: token.id,
+          email: token.email,
+          name: token.name,
+          role: token.role,
+        };
+      }
+      return session;
+    },
+    jwt({ token, user }) {
+      if (user) {
+        return Promise.resolve({ ...user });
+      } else {
+        return Promise.resolve(token);
+      }
+    },
+  },
+  pages: {
+    signIn: "/login",
+    error: "/login",
+  },
 };
 
 /**

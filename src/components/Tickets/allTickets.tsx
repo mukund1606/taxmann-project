@@ -433,49 +433,51 @@ function ActionsComponent({
           onClick={onEditModalOpen}
         />
       </Tooltip>
-      <Popover placement="bottom">
-        <PopoverTrigger>
-          <span>
-            <Tooltip content="Reply" color="secondary">
-              <MessageSquareQuoteIcon className="cursor-pointer text-lg text-default-400 active:opacity-50" />
-            </Tooltip>
-          </span>
-        </PopoverTrigger>
-        <PopoverContent>
-          <div className="w-72 px-1 py-2">
-            <Textarea
-              type="text"
-              variant="bordered"
-              label="Reply"
-              value={reply}
-              onChange={(e) => setReply(e.target.value)}
-            />
-            <Button
-              variant="bordered"
-              color="primary"
-              className="mt-2 w-full"
-              onClick={async () => {
-                try {
-                  await replyRoute.mutateAsync({
-                    ticketID: data.id,
-                    description: reply,
-                  });
-                  toast.success("Replied successfully");
-                } catch (e) {
-                  if (isTRPCClientError(e)) {
-                    toast.error(e.message);
+      {data.status === "OPEN" ? (
+        <Popover placement="bottom">
+          <PopoverTrigger>
+            <span>
+              <Tooltip content="Reply" color="secondary">
+                <MessageSquareQuoteIcon className="cursor-pointer text-lg text-default-400 active:opacity-50" />
+              </Tooltip>
+            </span>
+          </PopoverTrigger>
+          <PopoverContent>
+            <div className="w-72 px-1 py-2">
+              <Textarea
+                type="text"
+                variant="bordered"
+                label="Reply"
+                value={reply}
+                onChange={(e) => setReply(e.target.value)}
+              />
+              <Button
+                variant="bordered"
+                color="primary"
+                className="mt-2 w-full"
+                onClick={async () => {
+                  try {
+                    await replyRoute.mutateAsync({
+                      ticketID: data.id,
+                      description: reply,
+                    });
+                    toast.success("Replied successfully");
+                  } catch (e) {
+                    if (isTRPCClientError(e)) {
+                      toast.error(e.message);
+                    }
                   }
-                }
-                setReply("");
-              }}
-              isDisabled={reply === "" || replyRoute.isPending}
-              isLoading={replyRoute.isPending}
-            >
-              Reply
-            </Button>
-          </div>
-        </PopoverContent>
-      </Popover>
+                  setReply("");
+                }}
+                isDisabled={reply === "" || replyRoute.isPending}
+                isLoading={replyRoute.isPending}
+              >
+                Reply
+              </Button>
+            </div>
+          </PopoverContent>
+        </Popover>
+      ) : null}
       <Modal
         isOpen={isEditModalOpen}
         onOpenChange={onEditModalOpenChange}

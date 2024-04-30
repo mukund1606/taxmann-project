@@ -8,7 +8,6 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 import Nav from "@/components/Navbar";
 import { getServerAuthSession } from "@/server/auth";
-import { redirect } from "next/navigation";
 
 export const metadata = {
   title: "Ticket Support System",

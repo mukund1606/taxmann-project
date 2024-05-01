@@ -112,7 +112,7 @@ export default function CreateTicket() {
           <Button
             type="submit"
             color="primary"
-            className="px-2 text-center font-abeezee text-lg font-bold"
+            className="font-abeezee px-2 text-center text-lg font-bold"
           >
             Create Ticket
           </Button>

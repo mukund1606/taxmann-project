@@ -4,6 +4,14 @@ import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { CreateTicketFormSchema } from "@/types/forms";
 import { TRPCError } from "@trpc/server";
 
+import axios from "axios";
+
+export function getBaseUrl() {
+  if (typeof window !== "undefined") return window.location.origin;
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  return `http://localhost:${process.env.PORT ?? 3000}`;
+}
+
 export const ticketRouter = createTRPCRouter({
   tickets: protectedProcedure
     .input(z.object({ userID: z.string() }))
@@ -29,11 +37,27 @@ export const ticketRouter = createTRPCRouter({
           message: "Admins cannot create tickets",
         });
       }
+      const priority = await axios.post(`${getBaseUrl()}/py-api/predict`, {
+        text: input.description,
+      });
+      const priorityData = priority.data as {
+        prediction: string;
+      };
+      const prediction = JSON.parse(priorityData.prediction) as [
+        "Low" | "Medium" | "High" | "Critical",
+      ];
+      const priorityMap = {
+        Low: "LOW",
+        Medium: "MEDIUM",
+        High: "HIGH",
+        Critical: "CRITICAL",
+      };
+      const priorityValue = priorityMap[prediction[0]];
       const ticket = await ctx.db.ticket.create({
         data: {
           title: input.title,
           category: input.category,
-          priority: "LOW",
+          priority: priorityValue as "LOW" | "MEDIUM" | "HIGH" | "CRITICAL",
           status: "OPEN",
           content: [
             {

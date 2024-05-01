@@ -113,6 +113,8 @@ export default function CreateTicket() {
             type="submit"
             color="primary"
             className="font-abeezee px-2 text-center text-lg font-bold"
+            isDisabled={createRoute.isPending}
+            isLoading={createRoute.isPending}
           >
             Create Ticket
           </Button>

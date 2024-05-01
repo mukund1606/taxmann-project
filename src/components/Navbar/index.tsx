@@ -61,7 +61,7 @@ export default function Nav({ session }: { session: Session | null }) {
                   <Button
                     color="danger"
                     className="w-full"
-                    onClick={async () => {
+                    onPress={async () => {
                       await signOut({ callbackUrl: "/" });
                     }}
                   >
@@ -108,7 +108,7 @@ export default function Nav({ session }: { session: Session | null }) {
                 <p>Are you sure you want to logout?</p>
                 <Button
                   color="danger"
-                  onClick={async () => {
+                  onPress={async () => {
                     await signOut({ callbackUrl: "/" });
                   }}
                 >

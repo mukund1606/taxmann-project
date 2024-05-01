@@ -455,7 +455,7 @@ function ActionsComponent({
                 variant="bordered"
                 color="primary"
                 className="mt-2 w-full"
-                onClick={async () => {
+                onPress={async () => {
                   try {
                     await replyRoute.mutateAsync({
                       ticketID: data.id,

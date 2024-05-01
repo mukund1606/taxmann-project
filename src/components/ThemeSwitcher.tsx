@@ -15,7 +15,7 @@ export function ThemeToggle() {
       <Button
         variant="bordered"
         isIconOnly
-        onClick={() => {
+        onPress={() => {
           if (theme === "dark") {
             setTheme("light");
           } else {

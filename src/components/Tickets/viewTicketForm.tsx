@@ -86,7 +86,7 @@ export default function ViewTicket({
                 className="w-full"
                 isLoading={changePriorityRoute.isPending}
                 isDisabled={changePriorityRoute.isPending}
-                onClick={async () => {
+                onPress={async () => {
                   try {
                     await changePriorityRoute.mutateAsync({
                       ticketId: data.id,
@@ -109,7 +109,7 @@ export default function ViewTicket({
               color={data.status === "CLOSED" ? "primary" : "danger"}
               isLoading={changeTicketStatusRoute.isPending}
               isDisabled={changeTicketStatusRoute.isPending}
-              onClick={async () => {
+              onPress={async () => {
                 try {
                   if (data.status === "CLOSED") {
                     await changeTicketStatusRoute.mutateAsync({
@@ -178,7 +178,7 @@ export default function ViewTicket({
               size="md"
               isLoading={replyRoute.isPending}
               isDisabled={replyRoute.isPending || !reply}
-              onClick={async () => {
+              onPress={async () => {
                 try {
                   await replyRoute.mutateAsync({
                     ticketID: data.id,

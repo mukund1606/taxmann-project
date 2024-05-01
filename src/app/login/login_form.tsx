@@ -169,7 +169,9 @@ export default function LoginForm() {
                 <Button
                   type="submit"
                   color="primary"
-                  className="px-2 text-center font-abeezee text-lg font-bold"
+                  className="font-abeezee px-2 text-center text-lg font-bold"
+                  isDisabled={form.formState.isSubmitting}
+                  isLoading={form.formState.isSubmitting}
                 >
                   Login
                 </Button>

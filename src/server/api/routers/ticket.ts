@@ -6,12 +6,6 @@ import { TRPCError } from "@trpc/server";
 
 import axios from "axios";
 
-export function getBaseUrl() {
-  if (typeof window !== "undefined") return window.location.origin;
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
-  return `http://localhost:${process.env.PORT ?? 3000}`;
-}
-
 export const ticketRouter = createTRPCRouter({
   tickets: protectedProcedure
     .input(z.object({ userID: z.string() }))
@@ -37,9 +31,12 @@ export const ticketRouter = createTRPCRouter({
           message: "Admins cannot create tickets",
         });
       }
-      const priority = await axios.post(`${getBaseUrl()}/py-api/predict`, {
-        text: input.description,
-      });
+      const priority = await axios.post(
+        `https://taxmann-backend.mukund.page/predict`,
+        {
+          text: input.description,
+        },
+      );
       const priorityData = priority.data as {
         prediction: string;
       };

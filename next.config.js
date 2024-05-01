@@ -15,17 +15,6 @@ const config = {
     ],
   },
   reactStrictMode: true,
-  rewrites: async () => {
-    return [
-      {
-        source: "/py-api/:path*",
-        destination:
-          process.env.NODE_ENV === "development"
-            ? "http://localhost:8000/py-api/:path*"
-            : "/py-api/",
-      },
-    ];
-  },
 };
 
 export default config;
